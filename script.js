@@ -29,7 +29,7 @@ window.addEventListener("load",function(){
             this.game=game;
             this.x=x;
             this.y=y;
-            this.width=10;
+            this.width=30;
             this.height=3;
             this.realspeed=5;
             this.speed=this.realspeed*this.game.meter_scale;
