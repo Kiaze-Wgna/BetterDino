@@ -29,9 +29,9 @@ window.addEventListener("load",function(){
             this.game=game;
             this.x=x;
             this.y=y;
-            this.width=30;
+            this.width=20;
             this.height=3;
-            this.realspeed=5;
+            this.realspeed=10;
             this.speed=this.realspeed*this.game.meter_scale;
             this.alive=true;
         }
