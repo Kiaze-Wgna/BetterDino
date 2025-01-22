@@ -53,7 +53,7 @@ window.addEventListener("load",function(){
         constructor(game){
             this.game=game;
             this.width =120;
-            this.height=190;
+            this.height=1.8*this.game.meter_scale;
             this.x=20;
             this.y=100;
             this.speedY=0;
