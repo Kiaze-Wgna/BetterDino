@@ -31,7 +31,7 @@ window.addEventListener("load",function(){
             this.y=y;
             this.width=10;
             this.height=3;
-            this.realspeed=200;
+            this.realspeed=300;
             this.speed=this.realspeed*this.game.meter_scale;
             this.alive=true;
         }
