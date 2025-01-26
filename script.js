@@ -55,7 +55,7 @@ window.addEventListener("load",function(){
             this.y=y;
             this.width=10;
             this.height=3;
-            this.realspeed=20;
+            this.realspeed=200;
             this.speed=this.realspeed*this.game.meter_scale;
             this.alive=true;
         }
@@ -76,13 +76,8 @@ window.addEventListener("load",function(){
     class Player{
         constructor(game){
             this.game=game;
-<<<<<<< HEAD
-            this.width =120;
-            this.height=200;
-=======
             this.width =dinowidth;
             this.height=dinoheight;
->>>>>>> 9e3d2cd (changed aspect ratio, added assets, centralized constants in one place)
             this.x=20;
             this.y=100;
             this.speedY=0;
