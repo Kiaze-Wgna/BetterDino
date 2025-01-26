@@ -26,6 +26,7 @@ window.addEventListener("load",function(){
     const gravity=9.8*meter_scale;
     const realjumpingspeed=3.27*3;
     const jumpspeed=realjumpingspeed*meter_scale;
+    const animationspeedpersecond=0.1;
     
     //Classes
     class InputHandler {
@@ -84,6 +85,10 @@ window.addEventListener("load",function(){
             this.projectiles=[];
             this.player1=document.getElementById("player1");
             this.playerh2w=this.player1.height/this.player1.width;
+            this.player2=document.getElementById("player2");
+            this.playerjump=document.getElementById("playerjump");
+            this.current_player=this.player1
+            this.current_player_dt=0;
         } 
         update(){
             if ((this.game.keys.includes(" "))&&(this.speedY==0)) {
@@ -107,13 +112,30 @@ window.addEventListener("load",function(){
                 projectile.update();
             })
             this.projectiles=this.projectiles.filter(projectile => projectile.alive);
-            
+            // animation frame
+            console.log([this.current_player_dt,animationspeedpersecond*this.game.time_scale])
+            if (this.y<this.game.floor){
+                if (this.current_player!=this.playerjump){
+                    this.current_player=this.playerjump
+                } 
+            } else{
+                if (this.current_player_dt>animationspeedpersecond*this.game.time_scale){
+                    if (this.current_player==this.player1){
+                        this.current_player=this.player2
+                    } else{
+                        this.current_player=this.player1
+                    }
+                    this.current_player_dt=0
+                } else{
+                    this.current_player_dt+=this.game.time
+                }
+            }
         }
 
         draw(context){
             context.fillstyle="black";
             context.fillRect(this.x, this.y, this.width, this.height);
-            context.drawImage(this.player1,this.x, this.y,this.height/this.playerh2w,this.height)
+            context.drawImage(this.current_player,this.x, this.y,this.height/this.playerh2w,this.height)
             this.projectiles.forEach(projectile => {
                 projectile.draw(context);
             })
