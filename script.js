@@ -24,6 +24,7 @@ window.addEventListener("load",function(){
     const birdwidth=realbirdwidth*meter_scale;
     const floor=(floorfromtop-realdinosaurheight)*meter_scale;
     const gravity=9.8*meter_scale;
+    const sneakgravityfactor=50;
     const realjumpingspeed=3.27*3;
     const jumpspeed=realjumpingspeed*meter_scale;
     const animationspeedpersecond=0.1;
@@ -33,19 +34,25 @@ window.addEventListener("load",function(){
         constructor(game){
             this.game = game;
             window.addEventListener("keydown", e => {
-                if ((    (e.key === " ") ) && (this.game.keys.indexOf(e.key) === -1)){
-                    this.game.keys.push(e.key);
+                if (((e.key === " ")||(e.key === "ArrowUp")||(e.key === "w"))&&(this.game.keyJump==false)){
+                    this.game.keyJump=true;
+                }
+                else if (((e.key === "Shift")||(e.key === "ArrowDown")||(e.key === "s"))&&(this.game.keySneak==false)){
+                    this.game.keySneak=true;
+                    console.log("Shift")
                 }
                 else if (e.key === "q"){
                     this.game.player.shoot()
                 }
-                console.log(this.game.keys);
             });
             window.addEventListener("keyup", e => {
-                if (this.game.keys.indexOf(e.key) > -1){
-                    this.game.keys.splice(this.game.keys.indexOf(e.key), 1);
+                if ((e.key === " ")||(e.key === "ArrowUp")||(e.key === "w")){
+                    this.game.keyJump=false;
                 }
-                console.log(this.game.keys);
+                else if ((e.key === "Shift")||(e.key === "ArrowDown")||(e.key === "s")){
+                    this.game.keySneak=false;
+                    console.log("shift");
+                }
             });
         }
     }
@@ -87,48 +94,63 @@ window.addEventListener("load",function(){
             this.playerh2w=this.player1.height/this.player1.width;
             this.player2=document.getElementById("player2");
             this.playerjump=document.getElementById("playerjump");
-            this.current_player=this.player1
+            this.playersneak1=document.getElementById("playersneak1");
+            this.playersneak2=document.getElementById("playersneak2");
+            this.current_player=this.player1;
             this.current_player_dt=0;
+            this.current_gravity=gravity;
+            this.justlanded=false;
+            this.frames = [[this.player1, this.player2],[this.playersneak1, this.playersneak2]];
+            this.sneak=0;
+            this.animframe=0;
         } 
         update(){
-            if ((this.game.keys.includes(" "))&&(this.speedY==0)) {
+            
+            if ((this.game.keyJump)&&(this.speedY==0)) {
                 this.speedY=0-jumpspeed;
             }
             // gravity
+            if ((this.current_gravity!=gravity)&&(this.y>=this.game.floor)){
+                this.current_gravity=gravity
+            }
+            if ((this.game.keySneak)&&(this.current_gravity==gravity)&&(this.y<this.game.floor)){
+                this.current_gravity=gravity*sneakgravityfactor
+            }
             if ((this.speedY!=0)||(this.y<this.game.floor)){
-                const next_y= this.y + (this.speedY*this.game.time) + (0.5*gravity*(this.game.time**2))
+                const next_y= this.y + (this.speedY*this.game.time) + (0.5*this.current_gravity*(this.game.time**2))
                 if (next_y>=this.game.floor){
                     this.y=this.game.floor;
                     this.speedY=0;
                 }
                 else{
                     this.y=next_y;
-                    this.speedY=this.speedY+gravity*this.game.time;
+                    this.speedY=this.speedY+this.current_gravity*this.game.time;
                 }
             } 
-
+            
             // projectile
             this.projectiles.forEach(projectile => {
                 projectile.update();
             })
             this.projectiles=this.projectiles.filter(projectile => projectile.alive);
+
             // animation frame
-            console.log([this.current_player_dt,animationspeedpersecond*this.game.time_scale])
-            if (this.y<this.game.floor){
-                if (this.current_player!=this.playerjump){
-                    this.current_player=this.playerjump
-                } 
+            if (this.game.keySneak){
+                this.sneak=1;
             } else{
-                if (this.current_player_dt>animationspeedpersecond*this.game.time_scale){
-                    if (this.current_player==this.player1){
-                        this.current_player=this.player2
-                    } else{
-                        this.current_player=this.player1
-                    }
-                    this.current_player_dt=0
-                } else{
-                    this.current_player_dt+=this.game.time
-                }
+                this.sneak=0;
+            }
+            if (this.current_player_dt > (animationspeedpersecond * this.game.time_scale)) {
+                this.current_player_dt = 0;
+                this.animframe=(this.animframe+1)%2
+            } else {
+                this.current_player_dt += this.game.time;
+            }
+            console.log([this.current_player,this.frames])
+            if (this.y<this.game.floor){
+                this.current_player=this.playerjump
+            } else{
+                this.current_player=this.frames[this.sneak][this.animframe]
             }
         }
 
@@ -165,11 +187,14 @@ window.addEventListener("load",function(){
             this.time_scale=initial_time_scale;
             this.player=new Player(this);
             this.input=new InputHandler(this);
-            this.keys=[];
             this.last_time=performance.now()
             this.current_time=performance.now()
             this.delta_time=0
             this.time=this.delta_time*this.time_scale
+            //keys
+            this.keyJump=false;
+            this.keySneak=false;
+            //this.keys=[];
         }
         update(){
             this.current_time=performance.now()
