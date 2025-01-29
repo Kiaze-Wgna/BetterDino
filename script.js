@@ -15,13 +15,9 @@ window.addEventListener("load",function(){
     //calculated values setup
     const initial_time_scale=1;
     const realdinosaurheight=3.6;
-    const realdinosaurwidth=2;
     const realbirdheight=2;
-    const realbirdwidth=5.3;
     const dinoheight=realdinosaurheight*meter_scale;
-    const dinowidth=realdinosaurwidth*meter_scale;
     const birdheight=realbirdheight*meter_scale;
-    const birdwidth=realbirdwidth*meter_scale;
     const floor=(floorfromtop-realdinosaurheight)*meter_scale;
     const gravity=9.8*meter_scale;
     const sneakgravityfactor=50;
@@ -87,14 +83,13 @@ window.addEventListener("load",function(){
     class Player{
         constructor(game){
             this.game=game;
-            this.width =dinowidth;
             this.height=dinoheight;
             this.x=20;
             this.y=100;
             this.speedY=0;
             this.projectiles=[];
             this.player1=document.getElementById("player1");
-            this.playerh2w=this.player1.height/this.player1.width;
+            this.width =this.height*this.player1.width/this.player1.height;
             this.player2=document.getElementById("player2");
             this.playerjump=document.getElementById("playerjump");
             this.playersneak1=document.getElementById("playersneak1");
@@ -160,7 +155,7 @@ window.addEventListener("load",function(){
         draw(context){
             context.fillstyle="black";
             //context.fillRect(this.x, this.y, this.width, this.height);
-            context.drawImage(this.current_player,this.x, this.y,this.height/this.playerh2w,this.height)
+            context.drawImage(this.current_player,this.x, this.y,this.width,this.height)
             this.projectiles.forEach(projectile => {
                 projectile.draw(context);
             })
