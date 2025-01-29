@@ -12,6 +12,7 @@ window.addEventListener("load",function(){
     const width = realwidth*meter_scale;
     canvas.width = width;
     canvas.height = height;
+    
     //calculated values setup
     const initial_time_scale=1;
     const realdinosaurheight=3.6;
@@ -27,6 +28,18 @@ window.addEventListener("load",function(){
     const realdinorunspeed=12.22;
     const dinorunspeed=realdinorunspeed*meter_scale
     const realfloorheightonimagefromtop=127;
+    //enemy levels
+    const lowlevel=(floorfromtop*meter_scale);
+    const midlevel=0.5*height;
+    const highlevel=0.2*height;
+    //enemy spawn
+    const enemyspawnlocation=1.1*width
+    const enemyspawntime=3;
+    const enemyspawnrange=2;
+    const cactuslargeheightoffsetratio=0.07;
+    //pixel_scale
+    const player1=document.getElementById("player1");
+    const pixel_scale=dinoheight/player1.height;
     
     //Classes
     class InputHandler {
@@ -38,7 +51,6 @@ window.addEventListener("load",function(){
                 }
                 else if (((e.key === "Shift")||(e.key === "ArrowDown")||(e.key === "s"))&&(this.game.keySneak==false)){
                     this.game.keySneak=true;
-                    console.log("Shift")
                 }
                 else if (e.key === "q"){
                     this.game.player.shoot()
@@ -50,7 +62,6 @@ window.addEventListener("load",function(){
                 }
                 else if ((e.key === "Shift")||(e.key === "ArrowDown")||(e.key === "s")){
                     this.game.keySneak=false;
-                    console.log("shift");
                 }
             });
         }
@@ -84,12 +95,12 @@ window.addEventListener("load",function(){
         constructor(game){
             this.game=game;
             this.height=dinoheight;
+            this.width =this.height*pixel_scale;
             this.x=20;
             this.y=100;
             this.speedY=0;
             this.projectiles=[];
-            this.player1=document.getElementById("player1");
-            this.width =this.height*this.player1.width/this.player1.height;
+            this.player1=player1
             this.player2=document.getElementById("player2");
             this.playerjump=document.getElementById("playerjump");
             this.playersneak1=document.getElementById("playersneak1");
@@ -143,7 +154,6 @@ window.addEventListener("load",function(){
             } else {
                 this.current_player_dt += this.game.time;
             }
-            console.log([this.current_player,this.frames])
             if (this.y<this.game.floor){
                 this.current_player=this.playerjump
             } else{
@@ -163,8 +173,66 @@ window.addEventListener("load",function(){
             this.projectiles.push(new Projectile(this.game,this.x,this.y));
         }
     }
-    class Enemy{
-
+    class Cactus{
+        constructor(game,cactus,offset){
+            this.game=game;
+            this.cactus=cactus;
+            this.width=this.cactus.width*pixel_scale;
+            this.height=this.cactus.height*pixel_scale;
+            this.x=enemyspawnlocation+offset;
+            if (this.cactus.height==100) this.y=lowlevel-this.height+(cactuslargeheightoffsetratio*this.height);
+            else this.y=lowlevel-this.height;
+            this.alive=true;
+        }
+        update(){
+            if (this.x<=-this.width) this.alive=false;
+            else this.x=this.x-dinorunspeed*this.game.time;
+        }
+        draw(context){
+            context.drawImage(this.cactus,this.x,this.y,this.width,this.height)
+        }
+    }
+    class EnemyController{
+        constructor(game){
+            this.game=game;
+            this.enemyspawndt=0;
+            this.enemycategory=0;
+            this.cactuscount=0;
+            this.cactusrandom=0;
+            this.cactus=player1;
+            this.enemylist=[];
+            this.enemyspawnrandomtimerange=(enemyspawntime-(enemyspawnrange/2)+Math.random()*enemyspawnrange);
+        }
+        update(){
+            if (this.enemyspawndt>=this.enemyspawnrandomtimerange){
+                this.enemyspawnrandomtimerange=(enemyspawntime-(enemyspawnrange/2)+Math.random()*enemyspawnrange);
+                this.enemyspawndt=0;
+                this.enemycategory=0;
+                if (this.enemycategory==0){
+                    this.cactuscount=0;
+                    this.spawncactus(0);
+                }
+            }else this.enemyspawndt+=this.game.time;
+            this.enemylist.forEach(enemy => {
+                enemy.update();
+            })
+            this.enemylist=this.enemylist.filter(enemy => enemy.alive);
+        }
+        draw(context){
+            this.enemylist.forEach(enemy => {
+                enemy.draw(context);
+            })
+        }
+        spawncactus(offset){
+            if (this.cactuscount==0) this.cactusrandom=Math.floor(Math.random()*8);
+            else this.cactusrandom=Math.floor(Math.random()*7)
+            this.cactus=document.getElementById("cactus"+String(this.cactusrandom+1));
+            this.enemylist.push(new Cactus(this.game,this.cactus,offset))
+            this.cactuscount+=1
+            if ((this.cactus.width<150)&&(this.cactuscount<3)){
+                this.spawncactus(offset+(this.cactus.width*pixel_scale))
+            }    
+        }
     }
     class Layer{
 
@@ -173,10 +241,10 @@ window.addEventListener("load",function(){
         constructor(game){
             this.game=game;
             this.background=document.getElementById("background");
-            this.height=this.background.height*dinoheight/this.game.player.player1.height;
-            this.width=(this.height*this.background.width)/this.background.height;
+            this.height=this.background.height*pixel_scale;
+            this.width=this.background.width*pixel_scale;
             this.x=0;
-            this.y=this.game.floor+dinoheight-((realfloorheightonimagefromtop*dinoheight)/this.game.player.player1.height);
+            this.y=this.game.floor+dinoheight-(realfloorheightonimagefromtop*pixel_scale);
         }
         update(){
             if (this.x<=-this.width) this.x=0;
@@ -197,6 +265,7 @@ window.addEventListener("load",function(){
             this.floor=floor;
             this.meter_scale=meter_scale;
             this.time_scale=initial_time_scale;
+            this.enemies=new EnemyController(this);
             this.player=new Player(this);
             this.input=new InputHandler(this);
             this.background=new Background(this);
@@ -214,11 +283,13 @@ window.addEventListener("load",function(){
             this.delta_time=(this.current_time-this.last_time)/1000 
             this.time=this.delta_time*this.time_scale
             this.last_time=this.current_time
+            this.enemies.update();
             this.player.update();
             this.background.update()
         }
         draw(context){
             this.background.draw(context);
+            this.enemies.draw(context);
             this.player.draw(context);
         }
         detect_collision(obj1,obj2){
