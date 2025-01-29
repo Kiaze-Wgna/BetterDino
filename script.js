@@ -12,7 +12,6 @@ window.addEventListener("load",function(){
     const width = realwidth*meter_scale;
     canvas.width = width;
     canvas.height = height;
-    
     //calculated values setup
     const initial_time_scale=1;
     const realdinosaurheight=3.6;
@@ -37,6 +36,7 @@ window.addEventListener("load",function(){
     const enemyspawntime=3;
     const enemyspawnrange=2;
     const cactuslargeheightoffsetratio=0.07;
+    const enemyspeed=dinorunspeed;
     //pixel_scale
     const player1=document.getElementById("player1");
     const pixel_scale=dinoheight/player1.height;
@@ -149,6 +149,7 @@ window.addEventListener("load",function(){
                 this.sneak=0;
             }
             if (this.current_player_dt > animationspeedpersecond) {
+                this.game.enemies.enemylist.forEach(enemy => enemy.animate())
                 this.current_player_dt = 0;
                 this.animframe=(this.animframe+1)%2
             } else {
@@ -171,6 +172,36 @@ window.addEventListener("load",function(){
         }
         shoot(){
             this.projectiles.push(new Projectile(this.game,this.x,this.y));
+        }
+    }
+    class Enemy{
+        constructor(game){
+            this.game=game;
+            this.category=Math.floor(Math.random()*2);
+            this.dino1=document.getElementById("dino1");
+            this.dino2=document.getElementById("dino2");
+            this.bird1=document.getElementById("bird1");
+            this.bird2=document.getElementById("bird2");
+            this.frames=[[this.dino1,this.dino2],[this.bird1,this.bird2]]
+            this.current_frame=this.frames[this.category][0];
+            this.width=this.current_frame.width*pixel_scale;
+            this.height=this.current_frame.height*pixel_scale;
+            this.x=enemyspawnlocation;
+            if (this.category==0) this.y=lowlevel-this.height;
+            else this.y=midlevel-this.height;
+            this.alive=true;
+            this.enemyanimframe=0;
+        }
+        update(){
+            if (this.x<=-this.width) this.alive=false;
+            else this.x=this.x-(dinorunspeed+enemyspeed)*this.game.time;
+        }
+        animate(){
+            this.enemyanimframe=(this.enemyanimframe+1)%2
+            this.current_frame=this.frames[this.category][this.enemyanimframe]
+        }
+        draw(context){
+            context.drawImage(this.current_frame,this.x,this.y,this.width,this.height)
         }
     }
     class Cactus{
@@ -196,38 +227,45 @@ window.addEventListener("load",function(){
         constructor(game){
             this.game=game;
             this.enemyspawndt=0;
-            this.enemycategory=0;
             this.cactuscount=0;
             this.cactusrandom=0;
             this.cactus=player1;
             this.enemylist=[];
+            this.cactuslist=[];
             this.enemyspawnrandomtimerange=(enemyspawntime-(enemyspawnrange/2)+Math.random()*enemyspawnrange);
         }
         update(){
             if (this.enemyspawndt>=this.enemyspawnrandomtimerange){
                 this.enemyspawnrandomtimerange=(enemyspawntime-(enemyspawnrange/2)+Math.random()*enemyspawnrange);
                 this.enemyspawndt=0;
-                this.enemycategory=0;
-                if (this.enemycategory==0){
-                    this.cactuscount=0;
-                    this.spawncactus(0);
-                }
+                //cactus spawning
+                this.cactuscount=0;
+                this.spawncactus(0);
+                //enemy spawning
+                this.enemylist.push(new Enemy(this.game))
             }else this.enemyspawndt+=this.game.time;
             this.enemylist.forEach(enemy => {
                 enemy.update();
             })
             this.enemylist=this.enemylist.filter(enemy => enemy.alive);
+            this.cactuslist.forEach(cactus => {
+                cactus.update();
+            })
+            this.cactuslist=this.cactuslist.filter(cactus => cactus.alive);
         }
         draw(context){
             this.enemylist.forEach(enemy => {
                 enemy.draw(context);
+            })
+            this.cactuslist.forEach(cactus => {
+                cactus.draw(context);
             })
         }
         spawncactus(offset){
             if (this.cactuscount==0) this.cactusrandom=Math.floor(Math.random()*8);
             else this.cactusrandom=Math.floor(Math.random()*7)
             this.cactus=document.getElementById("cactus"+String(this.cactusrandom+1));
-            this.enemylist.push(new Cactus(this.game,this.cactus,offset))
+            this.cactuslist.push(new Cactus(this.game,this.cactus,offset))
             this.cactuscount+=1
             if ((this.cactus.width<150)&&(this.cactuscount<3)){
                 this.spawncactus(offset+(this.cactus.width*pixel_scale))
@@ -283,14 +321,14 @@ window.addEventListener("load",function(){
             this.delta_time=(this.current_time-this.last_time)/1000 
             this.time=this.delta_time*this.time_scale
             this.last_time=this.current_time
-            this.enemies.update();
+            this.background.update();
             this.player.update();
-            this.background.update()
+            this.enemies.update();
         }
         draw(context){
             this.background.draw(context);
-            this.enemies.draw(context);
             this.player.draw(context);
+            this.enemies.draw(context);
         }
         detect_collision(obj1,obj2){
             return(
