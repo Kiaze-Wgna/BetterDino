@@ -97,7 +97,6 @@ window.addEventListener("load",function(){
             this.current_player=this.player1;
             this.current_player_dt=0;
             this.current_gravity=gravity;
-            this.justlanded=false;
             this.frames = [[this.player1, this.player2],[this.playersneak1, this.playersneak2]];
             this.sneak=0;
             this.animframe=0;
