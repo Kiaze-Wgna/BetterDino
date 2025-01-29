@@ -14,7 +14,7 @@ window.addEventListener("load",function(){
     canvas.height = height;
     //calculated values setup
     const initial_time_scale=1;
-    const realdinosaurheight=5.3;
+    const realdinosaurheight=3.6;
     const realdinosaurwidth=2;
     const realbirdheight=2;
     const realbirdwidth=5.3;
@@ -28,6 +28,9 @@ window.addEventListener("load",function(){
     const realjumpingspeed=3.27*3;
     const jumpspeed=realjumpingspeed*meter_scale;
     const animationspeedpersecond=0.1;
+    const realdinorunspeed=12.22;
+    const dinorunspeed=realdinorunspeed*meter_scale
+    const realfloorheightonimagefromtop=127;
     
     //Classes
     class InputHandler {
@@ -140,7 +143,7 @@ window.addEventListener("load",function(){
             } else{
                 this.sneak=0;
             }
-            if (this.current_player_dt > (animationspeedpersecond * this.game.time_scale)) {
+            if (this.current_player_dt > animationspeedpersecond) {
                 this.current_player_dt = 0;
                 this.animframe=(this.animframe+1)%2
             } else {
@@ -156,7 +159,7 @@ window.addEventListener("load",function(){
 
         draw(context){
             context.fillstyle="black";
-            context.fillRect(this.x, this.y, this.width, this.height);
+            //context.fillRect(this.x, this.y, this.width, this.height);
             context.drawImage(this.current_player,this.x, this.y,this.height/this.playerh2w,this.height)
             this.projectiles.forEach(projectile => {
                 projectile.draw(context);
@@ -173,7 +176,22 @@ window.addEventListener("load",function(){
 
     }
     class Background{
-
+        constructor(game){
+            this.game=game;
+            this.background=document.getElementById("background");
+            this.height=this.background.height*dinoheight/this.game.player.player1.height;
+            this.width=(this.height*this.background.width)/this.background.height;
+            this.x=0;
+            this.y=this.game.floor+dinoheight-((realfloorheightonimagefromtop*dinoheight)/this.game.player.player1.height);
+        }
+        update(){
+            if (this.x<=-this.width) this.x=0;
+            else this.x=this.x-dinorunspeed*this.game.time;
+        }
+        draw(context){
+            context.drawImage(this.background,this.x,this.y,this.width,this.height)
+            context.drawImage(this.background,this.x+this.width,this.y,this.width,this.height)
+        }
     }
     class UI{
 
@@ -187,10 +205,11 @@ window.addEventListener("load",function(){
             this.time_scale=initial_time_scale;
             this.player=new Player(this);
             this.input=new InputHandler(this);
-            this.last_time=performance.now()
-            this.current_time=performance.now()
-            this.delta_time=0
-            this.time=this.delta_time*this.time_scale
+            this.background=new Background(this);
+            this.last_time=performance.now();
+            this.current_time=performance.now();
+            this.delta_time=0;
+            this.time=this.delta_time*this.time_scale;
             //keys
             this.keyJump=false;
             this.keySneak=false;
@@ -202,8 +221,10 @@ window.addEventListener("load",function(){
             this.time=this.delta_time*this.time_scale
             this.last_time=this.current_time
             this.player.update();
+            this.background.update()
         }
         draw(context){
+            this.background.draw(context);
             this.player.draw(context);
         }
         detect_collision(obj1,obj2){
