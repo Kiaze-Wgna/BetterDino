@@ -12,8 +12,11 @@ window.addEventListener("load",function(){
     const width = realwidth*meter_scale;
     canvas.width = width;
     canvas.height = height;
+    //timescale
+    const initial_time_scale=0.9;
+    const timescaleincreasepersecond=0.01;
+    const timescalemax=2;
     //calculated values setup
-    const initial_time_scale=1;
     const realdinosaurheight=3.6;
     const realbirdheight=2;
     const dinoheight=realdinosaurheight*meter_scale;
@@ -29,7 +32,7 @@ window.addEventListener("load",function(){
     const realfloorheightonimagefromtop=127;
     //enemy levels
     const lowlevel=(floorfromtop*meter_scale);
-    const midlevel=0.5*height;
+    const midlevel=0.55*height;
     const highlevel=0.2*height;
     //enemy spawn
     const enemyspawnlocation=1.1*width
@@ -37,9 +40,17 @@ window.addEventListener("load",function(){
     const enemyspawnrange=2;
     const cactuslargeheightoffsetratio=0.07;
     const enemyspeed=dinorunspeed;
+    const enemydeathanimframetime=Math.sqrt((0.4*realheight)/(0.5*9.8));
     //pixel_scale
     const player1=document.getElementById("player1");
     const pixel_scale=dinoheight/player1.height;
+    //projectile
+    const projectileradius=0.23*meter_scale;
+    const projectilexpercentage=0.55;
+    const projectileypercentage=0.6;
+    const projectilereloadtime=2;
+    const projectilespeed=23.469*meter_scale
+    
     
     //Classes
     class InputHandler {
@@ -52,8 +63,8 @@ window.addEventListener("load",function(){
                 else if (((e.key === "Shift")||(e.key === "ArrowDown")||(e.key === "s"))&&(this.game.keySneak==false)){
                     this.game.keySneak=true;
                 }
-                else if (e.key === "q"){
-                    this.game.player.shoot()
+                else if ((e.key === "q")&&(this.game.player.projectiles[0].status==1)){
+                    this.game.shoot=true;
                 }
             });
             window.addEventListener("keyup", e => {
@@ -69,24 +80,52 @@ window.addEventListener("load",function(){
     class Projectile{
         constructor(game,x,y){
             this.game=game;
-            this.x=x;
-            this.y=y;
-            this.width=10;
-            this.height=3;
-            this.realspeed=200;
-            this.speed=this.realspeed*this.game.meter_scale;
+            this.centerx=x;
+            this.centery=y;
+            this.radius=0;
+            this.width=this.radius*2
+            this.height=this.radius*2
+            this.x=this.centerx-this.radius;
+            this.y=this.centery-this.radius;
+            this.speed=0;
             this.alive=true;
+            this.status=0;
+            this.reloadtimedt=0;
         }
-        update(){
-            this.x=this.x+this.speed*this.game.time;
-            if (this.x>this.game.width*0.8) this.alive=false;
+        update(x,y){
+            if (this.status<2){
+                this.centerx=x;
+                this.centery=y;
+                this.width=this.radius*2
+                this.height=this.radius*2  
+            }
+            this.x=this.centerx-this.radius;
+            this.y=this.centery-this.radius;
+            if (this.status==0)
+                if (this.reloadtimedt>=projectilereloadtime){
+                    this.reloadtimedt=0;
+                    this.status=1;
+                    this.radius=projectileradius;
+                } else{
+                    this.reloadtimedt+=this.game.time;
+                    this.radius=projectileradius*(this.reloadtimedt/projectilereloadtime)
+                }
+            if ((this.game.shoot)&&(this.status==1)){
+                this.game.shoot=false;
+                this.status=2;
+                this.speed=projectilespeed-dinorunspeed;
+            }
+            if (this.status==2){
+                this.centerx+=this.speed*this.game.time;
+            }
+            if (this.centerx>this.game.width) this.alive=false;
         }
         draw(context){
-            context.fillstyle="yellow";
-            context.fillRect(this.x, this.y, this.width, this.height);
+            context.beginPath();
+            context.arc(this.centerx, this.centery, this.radius, 0, 2 * Math.PI, false);
+            context.fillStyle = '#ff2600';
+            context.fill();
         }
-
-
     }
     class Particle {
 
@@ -98,8 +137,9 @@ window.addEventListener("load",function(){
             this.width =this.height*pixel_scale;
             this.x=20;
             this.y=100;
+            this.projectilex=this.x+this.width*projectilexpercentage
             this.speedY=0;
-            this.projectiles=[];
+            this.projectiles=[new Projectile(this.game,this.projectilex,this.y+this.height*projectileypercentage)];
             this.player1=player1
             this.player2=document.getElementById("player2");
             this.playerjump=document.getElementById("playerjump");
@@ -119,13 +159,13 @@ window.addEventListener("load",function(){
             }
             // gravity
             if ((this.current_gravity!=gravity)&&(this.y>=this.game.floor)){
-                this.current_gravity=gravity
+                this.current_gravity=gravity;
             }
             if ((this.game.keySneak)&&(this.current_gravity==gravity)&&(this.y<this.game.floor)){
                 this.current_gravity=gravity*sneakgravityfactor
             }
             if ((this.speedY!=0)||(this.y<this.game.floor)){
-                const next_y= this.y + (this.speedY*this.game.time) + (0.5*this.current_gravity*(this.game.time**2))
+                const next_y= this.y + (this.speedY*this.game.time)
                 if (next_y>=this.game.floor){
                     this.y=this.game.floor;
                     this.speedY=0;
@@ -137,8 +177,11 @@ window.addEventListener("load",function(){
             } 
             
             // projectile
+            if (this.projectiles[0].centerx>this.projectilex){
+                this.projectiles.unshift(new Projectile(this.game, this.projectilex,this.y+this.height*projectileypercentage))
+            }
             this.projectiles.forEach(projectile => {
-                projectile.update();
+                projectile.update(this.projectilex,this.y+this.height*projectileypercentage);
             })
             this.projectiles=this.projectiles.filter(projectile => projectile.alive);
 
@@ -161,7 +204,6 @@ window.addEventListener("load",function(){
                 this.current_player=this.frames[this.sneak][this.animframe]
             }
         }
-
         draw(context){
             context.fillstyle="black";
             //context.fillRect(this.x, this.y, this.width, this.height);
@@ -170,20 +212,22 @@ window.addEventListener("load",function(){
                 projectile.draw(context);
             })
         }
-        shoot(){
-            this.projectiles.push(new Projectile(this.game,this.x,this.y));
-        }
     }
     class Enemy{
         constructor(game){
             this.game=game;
             this.category=Math.floor(Math.random()*2);
+            this.status=0;
             this.dino1=document.getElementById("dino1");
             this.dino2=document.getElementById("dino2");
+            this.dinoshocked1=document.getElementById("dinoshocked1");
+            this.dinoshocked2=document.getElementById("dinoshocked2");
             this.bird1=document.getElementById("bird1");
             this.bird2=document.getElementById("bird2");
-            this.frames=[[this.dino1,this.dino2],[this.bird1,this.bird2]]
-            this.current_frame=this.frames[this.category][0];
+            this.birdshocked1=document.getElementById("birdshocked");
+            this.birdshocked2=this.birdshocked1;
+            this.frames=[[[this.dino1,this.dino2],[this.bird1,this.bird2]],[[this.dinoshocked1,this.dinoshocked2],[this.birdshocked1,this.birdshocked2]]]
+            this.current_frame=this.frames[this.status][this.category][0];
             this.width=this.current_frame.width*pixel_scale;
             this.height=this.current_frame.height*pixel_scale;
             this.x=enemyspawnlocation;
@@ -191,14 +235,57 @@ window.addEventListener("load",function(){
             else this.y=midlevel-this.height;
             this.alive=true;
             this.enemyanimframe=0;
+            this.death_dt=0;
+            this.speedY=0;
+            this.closest_projectile=this.game.player.projectiles[this.game.player.projectiles.length-1];
         }
         update(){
-            if (this.x<=-this.width) this.alive=false;
-            else this.x=this.x-(dinorunspeed+enemyspeed)*this.game.time;
+            this.closest_projectile=this.game.player.projectiles[this.game.player.projectiles.length-1];
+            if ((this.status==0)&&(this.game.detect_collision(this,this.closest_projectile))&&(this.closest_projectile.speed!=0)){
+                this.status=1;
+                this.closest_projectile.alive=false;
+            }
+            if (this.status==0){
+                if (this.x<=-this.width) this.alive=false;
+                else this.x=this.x-(dinorunspeed+enemyspeed)*this.game.time;
+            } else if (this.status==1){
+                if (this.death_dt==0){
+                    this.enemyanimframe=0;
+                } else if ((this.death_dt>=(enemydeathanimframetime/2))&&(this.death_dt<enemydeathanimframetime)){
+                    this.enemyanimframe=1;
+                } else if ((this.death_dt>=enemydeathanimframetime)||((this.category==1)&&(this.y==this.game.floor))){
+                    this.alive=false;
+                    this.death_dt=-1
+                }
+                if (this.alive){
+                    this.death_dt+=this.game.time;
+                }
+                if (this.y<this.game.floor){
+                    const enemy_next_y= this.y + (this.speedY*this.game.time)
+                    if (enemy_next_y>=this.game.floor){
+                        this.y=this.game.floor;
+                        this.speedY=0;
+                    }
+                    else{
+                        this.y=enemy_next_y;
+                        this.speedY=this.speedY+gravity*this.game.time;
+                    }
+                }
+                if (this.category==0) this.x=this.x-dinorunspeed*this.game.time;
+                else if (this.category==1) this.x=this.x-(dinorunspeed+enemyspeed)*this.game.time;
+                this.current_frame=this.frames[this.status][this.category][this.enemyanimframe];
+                if ((this.category==1)&&(this.y==this.game.floor)){
+                    this.alive=false;
+                    this.death_dt=-1
+                }
+            }
         }
         animate(){
-            this.enemyanimframe=(this.enemyanimframe+1)%2
-            this.current_frame=this.frames[this.category][this.enemyanimframe]
+            if (this.status==0){
+                this.enemyanimframe=(this.enemyanimframe+1)%2;
+                this.current_frame=this.frames[this.status][this.category][this.enemyanimframe];
+            }
+            
         }
         draw(context){
             context.drawImage(this.current_frame,this.x,this.y,this.width,this.height)
@@ -314,7 +401,7 @@ window.addEventListener("load",function(){
             //keys
             this.keyJump=false;
             this.keySneak=false;
-            //this.keys=[];
+            this.shoot=false;
         }
         update(){
             this.current_time=performance.now()
@@ -324,6 +411,8 @@ window.addEventListener("load",function(){
             this.background.update();
             this.player.update();
             this.enemies.update();
+            if (this.time_scale>=timescalemax) this.time_scale=timescalemax;
+            else this.time_scale+=timescaleincreasepersecond*this.delta_time;
         }
         draw(context){
             this.background.draw(context);
