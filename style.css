@@ -15,6 +15,6 @@
     max-height: 100%;
 }
 
-#player1, #player2, #playerjump, #playershocked1, #playershocked2, #playersneak1, #playersneak2, #background, #cactus1, #cactus2, #cactus3, #cactus4, #cactus5, #cactus6, #cactus7, #cactus8, #dino1, #dino2, #dinoshocked1, #dinoshocked2, #bird1, #bird2, #birdshocked{
+#player1, #player2, #playerjump, #playershocked, #playersneak1, #playersneak2, #background, #gameover, #cactus1, #cactus2, #cactus3, #cactus4, #cactus5, #cactus6, #cactus7, #cactus8, #dino1, #dino2, #dinoshocked, #bird1, #bird2, #birdshocked{
     display: none;
 }
