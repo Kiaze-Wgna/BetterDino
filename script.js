@@ -48,10 +48,8 @@ window.addEventListener("load",function(){
     const projectileradius=0.23*meter_scale;
     const projectilexpercentage=0.55;
     const projectileypercentage=0.6;
-    const projectilereloadtime=2;
+    const projectilereloadtime=1.5;
     const projectilespeed=23.469*meter_scale
-    
-    
     //Classes
     class InputHandler {
         constructor(game){
@@ -220,13 +218,11 @@ window.addEventListener("load",function(){
             this.status=0;
             this.dino1=document.getElementById("dino1");
             this.dino2=document.getElementById("dino2");
-            this.dinoshocked1=document.getElementById("dinoshocked1");
-            this.dinoshocked2=document.getElementById("dinoshocked2");
+            this.dinoshocked=document.getElementById("dinoshocked");
             this.bird1=document.getElementById("bird1");
             this.bird2=document.getElementById("bird2");
-            this.birdshocked1=document.getElementById("birdshocked");
-            this.birdshocked2=this.birdshocked1;
-            this.frames=[[[this.dino1,this.dino2],[this.bird1,this.bird2]],[[this.dinoshocked1,this.dinoshocked2],[this.birdshocked1,this.birdshocked2]]]
+            this.birdshocked=document.getElementById("birdshocked");
+            this.frames=[[[this.dino1,this.dino2],[this.bird1,this.bird2]],[[this.dinoshocked],[this.birdshocked]]]
             this.current_frame=this.frames[this.status][this.category][0];
             this.width=this.current_frame.width*pixel_scale;
             this.height=this.current_frame.height*pixel_scale;
@@ -251,8 +247,6 @@ window.addEventListener("load",function(){
             } else if (this.status==1){
                 if (this.death_dt==0){
                     this.enemyanimframe=0;
-                } else if ((this.death_dt>=(enemydeathanimframetime/2))&&(this.death_dt<enemydeathanimframetime)){
-                    this.enemyanimframe=1;
                 } else if ((this.death_dt>=enemydeathanimframetime)||((this.category==1)&&(this.y==this.game.floor))){
                     this.alive=false;
                     this.death_dt=-1
