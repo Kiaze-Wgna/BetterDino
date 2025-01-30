@@ -67,7 +67,7 @@ window.addEventListener("load",function(){
                     console.log("shift")
                 }
                 console.log("2")
-                if (((e.key === "q")||(e.key === "Q")||(e.key === "ArrowLeft"))&&(this.game.player.projectiles[0].status==1)){
+                if (((e.key === "q")||(e.key === "Q")||(e.key === "d")||(e.key === "D")||(e.key === "ArrowRight"))&&(this.game.player.projectiles[0].status==1)){
                     this.game.shoot=true;
                     console.log("shoot")
                 }
@@ -475,17 +475,16 @@ window.addEventListener("load",function(){
     }
     //actual code
     ctx.font="30px Courier New";
-    var gamelis=[];
+    var gamelis=[new Game()];
+    document.addEventListener("keydown", function() {
+        if ((gamelis.length>0)&&(!gamelis[0].alive)){
+            gamelis=[new Game()];
+        }
+    });
     function animation(){
-        if (gamelis.length==0) gamelis.push(new Game());
         ctx.clearRect(0,0,canvas.width,canvas.height);
         gamelis[0].update();
         gamelis[0].draw(ctx);
-        if (!gamelis[0].alive){
-            document.addEventListener("keydown", function() {
-                gamelis=[]
-            });
-        }
         requestAnimationFrame(animation);
     }
     animation();
