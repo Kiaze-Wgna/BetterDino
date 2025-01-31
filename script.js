@@ -383,7 +383,7 @@ window.addEventListener("load",function(){
             this.score=0
         }
         update(){
-            this.score+=dinorunspeed*this.game.time;
+            this.score+=realdinorunspeed*this.game.time;
         }
         draw(context){
             context.strokeText("Score: "+String(Math.floor(this.score)),10,30)
