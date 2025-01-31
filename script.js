@@ -459,14 +459,14 @@ window.addEventListener("load",function(){
             if (player.sneak==0){
                 return(
                     player.y<enemy.y+enemy.height &&
-                    player.y+player.height>enemy.y &&
+                    player.y+(0.73*player.height)>enemy.y &&
                     player.x+(0.73*player.width)>=enemy.x &&
                     player.x<enemy.x+enemy.width
                 )
             } else{
                 return(
                     player.y<enemy.y+enemy.height &&
-                    player.y+player.height>enemy.y &&
+                    player.y+(0.73*player.height)>enemy.y &&
                     player.x+player.width>enemy.x &&
                     player.x<enemy.x+enemy.width
                 )
