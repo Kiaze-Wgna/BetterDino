@@ -450,8 +450,8 @@ window.addEventListener("load",function(){
         }
         detect_collision_projectile(projectile,enemy){
             return(
-                projectile.y-projectile.radius<enemy.y+enemy.height &&
-                projectile.y+projectile.radius>enemy.y &&
+                projectile.y-(1.5*projectile.radius)<enemy.y+enemy.height &&
+                projectile.y+(1.5*projectile.radius)>enemy.y &&
                 projectile.x+projectile.radius>=enemy.x
             )
         }
