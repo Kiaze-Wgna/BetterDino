@@ -175,7 +175,6 @@ window.addEventListener("load",function(){
                 else projectile.update(this.projectilexsneak,this.y+this.height*projectileysneak);
             })
             this.projectiles=this.projectiles.filter(projectile => projectile.alive);
-
             // animation frame
             if (this.game.keySneak){
                 this.sneak=1;
@@ -433,7 +432,6 @@ window.addEventListener("load",function(){
                 if (this.time_scale>=timescalemax) this.time_scale=timescalemax;
                 else this.time_scale+=timescaleincreasepersecond*this.delta_time;
             }
-            
         }
         draw(context){
             this.background.draw(context);
