@@ -59,19 +59,13 @@ window.addEventListener("load",function(){
             window.addEventListener("keydown", e => {
                 if (((e.key === " ")||(e.key === "ArrowUp")||(e.key === "w")||(e.key === "W"))&&(this.game.keyJump==false)){
                     this.game.keyJump=true;
-                    console.log("jump")
                 }
-                console.log("1")
                 if (((e.key === "Shift")||(e.key === "ArrowDown")||(e.key === "s")||(e.key === "S"))&&(this.game.keySneak==false)){
                     this.game.keySneak=true;
-                    console.log("shift")
                 }
-                console.log("2")
                 if (((e.key === "q")||(e.key === "Q")||(e.key === "d")||(e.key === "D")||(e.key === "ArrowRight"))&&(this.game.player.projectiles[0].status==1)){
                     this.game.shoot=true;
-                    console.log("shoot")
                 }
-                console.log("3")
             });
             window.addEventListener("keyup", e => {
                 if ((e.key === " ")||(e.key === "ArrowUp")||(e.key === "w")){
