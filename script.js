@@ -227,13 +227,15 @@ window.addEventListener("load",function(){
             this.enemyanimframe=0;
             this.death_dt=0;
             this.speedY=0;
-            this.closest_projectile=this.game.player.projectiles[this.game.player.projectiles.length-1];
         }
         update(){
-            this.closest_projectile=this.game.player.projectiles[this.game.player.projectiles.length-1];
-            if ((this.status==0)&&(this.game.detect_collision_projectile(this.closest_projectile,this))&&(this.closest_projectile.speed!=0)){
-                this.status=1;
-                this.closest_projectile.alive=false;
+            if (this.status==0){
+                this.game.player.projectiles.forEach(projectile => {
+                    if ((this.game.detect_collision_projectile(projectile,this))&&(projectile.speed!=0)){
+                        this.status=1;
+                        projectile.alive=false;
+                    }
+                }) 
             }
             if (this.status==0){
                 if (this.x<=-this.width) this.alive=false;
