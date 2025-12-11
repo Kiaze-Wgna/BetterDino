@@ -52,6 +52,17 @@ window.addEventListener("load",function(){
     const projectileysneak=0.8;
     const projectilereloadtime=1.5;
     const projectilespeed=23.469*meter_scale
+    //player hitbox scales
+    //normal
+    const upperboundscaleN=0.3
+    const lowerboundscaleN=0.73
+    const rightboundscaleN=0.5
+    const leftboundscaleN=0.1
+    //Sneak
+    const upperboundscaleS=0.47
+    const lowerboundscaleS=0.7
+    const rightboundscaleS=0.9
+    const leftboundscaleS=0.2
     //Classes
     class InputHandler {
         constructor(game){
@@ -197,9 +208,10 @@ window.addEventListener("load",function(){
             }
         }
         draw(context){
-            context.fillstyle="black";
-            //context.fillRect(this.x, this.y, this.width, this.height);
-            context.drawImage(this.current_player,this.x, this.y,this.width,this.height)
+            //context.fillstyle="red";
+            context.drawImage(this.current_player,this.x, this.y,this.width,this.height);
+            //context.fillRect(this.x+(leftboundscaleN*this.width), this.y+(upperboundscaleN*this.height), (rightboundscaleN-leftboundscaleN)*this.width, (lowerboundscaleN-upperboundscaleN)*this.height);
+            //context.fillRect(this.x+(leftboundscaleS*this.width), this.y+(upperboundscaleS*this.height), (rightboundscaleS-leftboundscaleS)*this.width, (lowerboundscaleS-upperboundscaleS)*this.height);
             this.projectiles.forEach(projectile => {
                 projectile.draw(context);
             })
@@ -452,17 +464,17 @@ window.addEventListener("load",function(){
         detect_collision_player(player,enemy){
             if (player.sneak==0){
                 return(
-                    player.y<enemy.y+enemy.height &&
-                    player.y+(0.73*player.height)>enemy.y &&
-                    player.x+(0.73*player.width)>=enemy.x &&
-                    player.x<enemy.x+enemy.width
+                    player.y+(upperboundscaleN*player.height)<enemy.y+enemy.height &&
+                    player.y+(lowerboundscaleN*player.height)>enemy.y &&
+                    player.x+(rightboundscaleN*player.width)>=enemy.x &&
+                    player.x+(leftboundscaleN*player.width)<enemy.x+enemy.width
                 )
             } else{
                 return(
-                    player.y<enemy.y+enemy.height &&
-                    player.y+(0.73*player.height)>enemy.y &&
-                    player.x+player.width>enemy.x &&
-                    player.x<enemy.x+enemy.width
+                    player.y+(upperboundscaleS*player.height)<enemy.y+enemy.height &&
+                    player.y+(lowerboundscaleS*player.height)>enemy.y &&
+                    player.x+(rightboundscaleS*player.width)>=enemy.x &&
+                    player.x+(leftboundscaleS*player.width)<enemy.x+enemy.width
                 )
             }
         }
