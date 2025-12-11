@@ -3,18 +3,63 @@
     padding: 0;
     box-sizing: border-box;
 }
-
-#canvas1 {
-    border: 5px solid black;
+.main_screen{
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 30px;
+}
+#canvas1 {
     background: #f5f5f5;
-    max-width: 100%;
-    max-height: 100%;
+    width: 100%;
+    max-height: 70%;
+    border: 5px solid black;
 }
 
 #player1, #player2, #playerjump, #playershocked, #playersneak1, #playersneak2, #background, #gameover, #cactus1, #cactus2, #cactus3, #cactus4, #cactus5, #cactus6, #cactus7, #cactus8, #dino1, #dino2, #dinoshocked, #bird1, #bird2, #birdshocked{
     display: none;
+}
+.options_container{
+    display:flex;
+    justify-content: center;
+    width: 100%;
+}
+.select-button{
+    font-size: 1rem;
+    background: green;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.35s;
+    outline: none;
+    z-index: 1;
+}
+.select-button span {
+    position: relative;
+    z-index: 2;
+    color: black;
+    text-decoration: none;
+}
+.select-button:after{
+    position: absolute;
+    content: '';
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: red;
+    transition: all 0.35s;
+    border-radius: 4px;
+    z-index: 1;
+}
+.select-button.active:after{
+    width: 100%;
 }

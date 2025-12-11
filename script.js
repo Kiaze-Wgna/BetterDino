@@ -13,7 +13,8 @@ window.addEventListener("load",function(){
     canvas.width = width;
     canvas.height = height;
     //timescale
-    const initial_time_scale=0.9;
+    const initial_time_scale_slow=0.9;
+    const initial_time_scale_fast=1.5;
     const timescaleincreasepersecond=0.01;
     const timescalemax=2;
     //calculated values setup
@@ -413,7 +414,11 @@ window.addEventListener("load",function(){
             this.height = height;
             this.floor=floor;
             this.meter_scale=meter_scale;
-            this.time_scale=initial_time_scale;
+            if (fast){
+                this.time_scale=initial_time_scale_fast;
+            } else{
+                this.time_scale=initial_time_scale_slow;
+            };
             this.enemies=new EnemyController(this);
             this.player=new Player(this);
             this.input=new InputHandler(this);
@@ -484,8 +489,23 @@ window.addEventListener("load",function(){
     var gamelis=[new Game()];
     document.addEventListener("keydown", function() {
         if ((gamelis.length>0)&&(!gamelis[0].alive)){
+            reset=false;
             gamelis=[new Game()];
         }
+    });
+    //button
+    var fast=false;
+    const options_button=document.getElementById("options_button")
+    options_button.addEventListener('click', (event) => {
+        event.currentTarget.classList.toggle('active');
+        if (fast) {
+            fast=false;
+            event.currentTarget.innerHTML="<span>Faster Start</span>";
+        } else {
+            fast=true;
+            event.currentTarget.innerHTML="<span>Slower Start</span>";
+        };
+        gamelis=[new Game()];
     });
     function animation(){
         ctx.clearRect(0,0,canvas.width,canvas.height);
