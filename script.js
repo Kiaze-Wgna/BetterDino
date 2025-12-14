@@ -179,12 +179,12 @@ window.addEventListener("load",function(){
             }
             // projectile
             if (this.projectiles[0].x>this.projectilexsneak){
-                if (this.sneak==0) this.projectiles.unshift(new Projectile(this.game, this.projectilex,this.y+this.height*projectileypercentage));
-                else this.projectiles.unshift(new Projectile(this.game, this.projectilexsneak,this.y+this.height*projectileysneak));
+                if ((this.sneak==1)&&(this.y>=this.game.floor)) this.projectiles.unshift(new Projectile(this.game, this.projectilexsneak,this.y+this.height*projectileysneak));
+                else this.projectiles.unshift(new Projectile(this.game, this.projectilex,this.y+this.height*projectileypercentage));
             }
             this.projectiles.forEach(projectile => {
-                if (this.sneak==0) projectile.update(this.projectilex,this.y+this.height*projectileypercentage);
-                else projectile.update(this.projectilexsneak,this.y+this.height*projectileysneak);
+                if ((this.sneak==1)&&(this.y>=this.game.floor)) projectile.update(this.projectilexsneak,this.y+this.height*projectileysneak);
+                else projectile.update(this.projectilex,this.y+this.height*projectileypercentage);
             })
             this.projectiles=this.projectiles.filter(projectile => projectile.alive);
             // animation frame
@@ -209,10 +209,16 @@ window.addEventListener("load",function(){
             }
         }
         draw(context){
-            //context.fillstyle="red";
+            context.strokeStyle="red";
+            context.lineWidth = 5;
             context.drawImage(this.current_player,this.x, this.y,this.width,this.height);
-            //context.fillRect(this.x+(leftboundscaleN*this.width), this.y+(upperboundscaleN*this.height), (rightboundscaleN-leftboundscaleN)*this.width, (lowerboundscaleN-upperboundscaleN)*this.height);
-            //context.fillRect(this.x+(leftboundscaleS*this.width), this.y+(upperboundscaleS*this.height), (rightboundscaleS-leftboundscaleS)*this.width, (lowerboundscaleS-upperboundscaleS)*this.height);
+            if (hitbox){
+                if ((this.sneak==1)&&(this.y>=this.game.floor)){
+                    context.strokeRect(this.x+(leftboundscaleS*this.width), this.y+(upperboundscaleS*this.height), (rightboundscaleS-leftboundscaleS)*this.width, (lowerboundscaleS-upperboundscaleS)*this.height);
+                } else {
+                    context.strokeRect(this.x+(leftboundscaleN*this.width), this.y+(upperboundscaleN*this.height), (rightboundscaleN-leftboundscaleN)*this.width, (lowerboundscaleN-upperboundscaleN)*this.height);
+                }
+            }
             this.projectiles.forEach(projectile => {
                 projectile.draw(context);
             })
@@ -290,6 +296,11 @@ window.addEventListener("load",function(){
             } 
         }
         draw(context){
+            context.strokeStyle="red";
+            context.lineWidth = 5;
+            if (hitbox){
+                context.strokeRect(this.x,this.y,this.width,this.height)
+            }
             context.drawImage(this.current_frame,this.x,this.y,this.width,this.height)
         }
     }
@@ -309,7 +320,12 @@ window.addEventListener("load",function(){
             else this.x=this.x-dinorunspeed*this.game.time;
         }
         draw(context){
+            context.strokeStyle="red";
+            context.lineWidth = 5;
             context.drawImage(this.cactus,this.x,this.y,this.width,this.height)
+            if (hitbox){
+                context.strokeRect(this.x,this.y,this.width,this.height)
+            }
         }
     }
     class EnemyController{
@@ -394,6 +410,8 @@ window.addEventListener("load",function(){
             this.score+=realdinorunspeed*this.game.time;
         }
         draw(context){
+            context.strokeStyle="black";
+            context.lineWidth = 2;
             context.strokeText("Score: "+String(Math.floor(this.score)),10,30)
         }
     }
@@ -506,6 +524,18 @@ window.addEventListener("load",function(){
             event.currentTarget.innerHTML="<span>Slower Start</span>";
         };
         gamelis=[new Game()];
+    });
+    var hitbox=false;
+    const hitbox_button=document.getElementById("hitbox_button")
+    hitbox_button.addEventListener('click', (event) => {
+        event.currentTarget.classList.toggle('active');
+        if (hitbox) {
+            hitbox=false;
+            event.currentTarget.innerHTML="<span>Show Hitbox</span>";
+        } else {
+            hitbox=true;
+            event.currentTarget.innerHTML="<span>Hide Hitbox</span>";
+        };
     });
     function animation(){
         ctx.clearRect(0,0,canvas.width,canvas.height);
