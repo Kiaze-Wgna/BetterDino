@@ -80,10 +80,10 @@ window.addEventListener("load",function(){
                 }
             });
             window.addEventListener("keyup", e => {
-                if ((e.key === " ")||(e.key === "ArrowUp")||(e.key === "w")){
+                if ((e.key === " ")||(e.key === "ArrowUp")||(e.key === "w")||(e.key === "W")){
                     this.game.keyJump=false;
                 }
-                if ((e.key === "Shift")||(e.key === "ArrowDown")||(e.key === "s")){
+                if ((e.key === "Shift")||(e.key === "ArrowDown")||(e.key === "s")||(e.key === "S")){
                     this.game.keySneak=false;
                 }
             });
